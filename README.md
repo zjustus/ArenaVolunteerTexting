@@ -4,7 +4,7 @@ Due to the nature of the resources being used, this module must only exist throu
 </p>
 <h2>Requirements</h2>
 <p>These Stored procedures require the KFS twilio texting module to be installed.</p>
-<h2>Instalation/h2>
+<h2>Instalation</h2>
 <ol>
 <li>Modify the VolunteerServiceView.ascx file to include the service ID <br> Add this code inside the script tag <br> <code>var serviceID = "<%= Session["_serviceID"] %>";</code></li>
 <li>next run the installer script to add the required stored procedures to the database</li>
