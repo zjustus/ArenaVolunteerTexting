@@ -10,12 +10,13 @@ Due to the nature of the resources being used, this module must only exist throu
 <li>next run the installer script to add the required stored procedures to the database</li>
 <li>make a new page in arena and add a "HTML from stored procedure" module to the page with the stored procedure "cust_luminte_HTML_sp_VolunteerSMSpage" and give it the paramaters @serviceID</li>
 <li>Add another "HTML from stored" module to Volunteer Service Page with the stored procedure "cust_luminate_HTML_sp_VolunteerSMSbutton" and give the paramater @target_page of the page you created in the previous step</li>
+<li>lastly to allow your volunteers to respond and text back add the keywords yes and no to your list of texting keywords and point them to the cust_luminate_sms_sp_yes and cust_luminate_sms_sp_no stored procedures</li>
 </ol>
 <h2>procedures List</h2>
 <p>a list of the stored procedures this installs</p>
 <ul>
-<li>cust_luminate_HTML_sp_VoluntterSMSpage</li>
-<li>cust_luminate_HTML_sp_VoluntterSMSbutton</li>
-<li>cust_luminate_SMS_sp_VoluntterSMSyes</li>
-<li>cust_luminate_SMS_sp_VoluntterSMSno</li>
+<li>cust_luminate_VolunteerTexting_sp_HTML</li>
+<li>cust_luminate_VolunteerTexting_sp_button</li>
+<li>cust_luminate_sms_sp_yes</li>
+<li>cust_luminate_sms_sp_no</li>
 </ul>
