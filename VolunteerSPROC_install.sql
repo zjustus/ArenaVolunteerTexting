@@ -49,8 +49,18 @@ DECLARE
 	@message_id int;
 
 
-DECLARE sms_cursor CURSOR
-FOR
+DECLARE @smsList table(
+	person_id int,
+	first_name varchar(50),
+	last_name varchar(50),
+	serviceName varchar(50),
+	start_date datetime,
+	end_date datetime,
+	teamName varchar(50),
+	positionName varchar(50),
+	position_id int)
+
+INSERT INTO @smsList
 SELECT
 	[person].person_id,
 	[person].first_name,
@@ -59,7 +69,8 @@ SELECT
 	[service].start_date,
 	[service].end_date,
 	[team].name as [teamName],
-	[tag].profile_name as [positionName]
+	[tag].profile_name as [positionName],
+	[position].team_position_id as [position_id]
 FROM DBO.volu_team_member as team_member
 LEFT JOIN DBO.volu_team_position as position on team_member.team_position_id = position.team_position_id
 LEFT JOIN DBO.volu_team as team on position.team_id = team.team_id
@@ -68,18 +79,20 @@ LEFT JOIN dbo.core_profile as tag on position.profile_id = tag.profile_id
 LEFT JOIN DBO.core_person as person on team_member.person_id = person.person_id
 where [service].service_id = @service_id;
 
-OPEN sms_cursor;
-FETCH NEXT FROM sms_cursor INTO
-	@person_id,
-	@first_name,
-	@last_name,
-	@service_name,
-	@start_date,
-	@end_date,
-	@team_name,
-	@position_name;
-WHILE @@FETCH_STATUS = 0
+-- declare person id
+DECLARE @person_key varchar(20)
+SELECT @person_key = MIN(convert(varchar(10), person_id)+'~'+convert(varchar(10), position_id)) from @smsList
+
+WHILE @person_key IS NOT NULL
 BEGIN
+	set @person_id = (SELECT top 1 person_id from @smsList where convert(varchar(10), person_id)+'~'+convert(varchar(10), position_id) = @person_key)
+	set @start_date = (SELECT top 1 start_date from @smsList where person_id = @person_id)
+	set @first_name = (SELECT top 1 first_name from @smsList where person_id = @person_id)
+	set @last_name = (SELECT top 1 last_name from @smsList where person_id = @person_id)
+	set @position_name = (SELECT top 1 positionName from @smsList where person_id = @person_id)
+	set @team_name = (SELECT top 1 teamName from @smsList where person_id = @person_id)
+	set @service_name = (SELECT top 1 serviceName from @smsList where person_id = @person_id)
+
 	SET @service_date = CONVERT(varchar(20), @start_date, 1)
 	SET @service_time = CONVERT(varchar(20), @start_date, 8)
 	SET @sms_message = @first_name+' '+@last_name+', you have been chosen to serve as a '+@position_name+' for the Luminate '+@team_name+' during the '+@service_name+' service on '+@service_date+' beginning at '+@service_time+'
@@ -117,11 +130,10 @@ BEGIN
 	--adds the person
 	EXEC core_sp_save_person_communication @message_id, @person_id,'1900-01-01 00:00:00.000','Queued',@GUID, 1
 
-	FETCH NEXT FROM sms_cursor
+	--increment to the next person
+	SELECT @person_key = MIN(convert(varchar(10), person_id)+'~'+convert(varchar(10), position_id)) from @smsList where convert(varchar(10), person_id)+'~'+convert(varchar(10), position_id) > @person_key
 END;
 
-CLOSE sms_cursor;
-DEALLOCATE sms_cursor;
 
 
 DECLARE @Results varchar(max) =
@@ -129,13 +141,14 @@ DECLARE @Results varchar(max) =
 	<p>texts have been sent out</p>
 </div>
 <div class="col">
-	<a href="/default.aspx?page='+CONVERT(varchar(10), @redirect_page)+' class="btn btn-primary">Go Back to Volunteer Managment</a>"
+	<a href="/default.aspx?page='+CONVERT(varchar(10), @redirect_page)+'" class="btn btn-primary">Go Back to Volunteer Managment</a>
 </div>'
 
 SELECT @Results AS [html]
 END
 GO
 
+/** SMS YES **/
 CREATE OR ALTER PROCEDURE [dbo].[cust_luminate_sms_sp_yes]
 (
 	@FromNumber VARCHAR(20)
@@ -307,6 +320,7 @@ SET @OutStatus = 1
 END
 GO
 
+/** SMS no **/
 CREATE OR ALTER PROCEDURE [dbo].[cust_luminate_sms_sp_no]
 (
 	@FromNumber VARCHAR(20)
