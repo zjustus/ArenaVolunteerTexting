@@ -1,4 +1,4 @@
-<h1>Arena Volutneer Texting - not ready yet - checkback later</h1>
+<h1>Arena Volutneer Texting</h1>
 <p>These stored procedures allow Arena to send Confirmation text messages to schedjuled volunteers.
 Due to the nature of the resources being used, this module must only exist through stored procedures making the setup more complicated than a normal module
 </p>
